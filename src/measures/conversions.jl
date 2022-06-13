@@ -44,9 +44,9 @@ measure(frame, Epoch(epoch"UTC", 50237.29*u"d"), epoch"TAI")
 measure
 
 mutable struct ReferenceFrame
-    epoch :: Nullable{Epoch}
-    direction :: Nullable{Direction}
-    position :: Nullable{Position}
+    epoch::Union{Missing,Epoch}
+    direction::Union{Missing,Direction}
+    position::Union{Missing,Position}
 end
 
 """
@@ -69,7 +69,7 @@ set!(frame, Epoch(epoch"UTC", 50237.29*u"d")) # set the current UTC time
 ```
 """
 function ReferenceFrame()
-    ReferenceFrame(nothing, nothing, nothing)
+    return ReferenceFrame(nothing, nothing, nothing)
 end
 
 set!(frame::ReferenceFrame, epoch::Epoch) = frame.epoch = epoch
@@ -80,29 +80,30 @@ set!(frame::ReferenceFrame, position::Position) = frame.position = position
 # new API that doesn't require it?
 
 function measure(frame::ReferenceFrame, epoch::Epoch, newsys::Epochs.System)
-    ccall(("convertEpoch", libcasacorewrapper), Epoch, (Ref{Epoch}, Cint), epoch, newsys)
+    return ccall(("convertEpoch", libcasacorewrapper), Epoch, (Ref{Epoch}, Cint), epoch,
+                 newsys)
 end
 
 function measure(frame::ReferenceFrame, direction::Direction, newsys::Directions.System)
-    ccall(("convertDirection", libcasacorewrapper), Direction,
-          (Ref{Direction}, Cint, Ref{ReferenceFrame}),
-          direction, newsys, frame)
+    return ccall(("convertDirection", libcasacorewrapper), Direction,
+                 (Ref{Direction}, Cint, Ref{ReferenceFrame}),
+                 direction, newsys, frame)
 end
 
 function measure(frame::ReferenceFrame, direction::UnnormalizedDirection, newsys)
-    measure(frame, Direction(direction), newsys)
+    return measure(frame, Direction(direction), newsys)
 end
 
 function measure(frame::ReferenceFrame, position::Position, newsys::Positions.System)
-    ccall(("convertPosition", libcasacorewrapper), Position,
-          (Ref{Position}, Cint, Ref{ReferenceFrame}),
-          position, newsys, frame)
+    return ccall(("convertPosition", libcasacorewrapper), Position,
+                 (Ref{Position}, Cint, Ref{ReferenceFrame}),
+                 position, newsys, frame)
 end
 
 function measure(frame::ReferenceFrame, baseline::Baseline, newsys::Baselines.System)
-    ccall(("convertBaseline", libcasacorewrapper), Baseline,
-          (Ref{Baseline}, Cint, Ref{ReferenceFrame}),
-          baseline, newsys, frame)
+    return ccall(("convertBaseline", libcasacorewrapper), Baseline,
+                 (Ref{Baseline}, Cint, Ref{ReferenceFrame}),
+                 baseline, newsys, frame)
 end
 
 # Define conversions and routines for comparing the different kinds of measures.
@@ -124,7 +125,7 @@ function Base.:(==)(lhs::Directions.System, rhs::Positions.System)
 end
 
 function Base.:(==)(lhs::Directions.System, rhs::Baselines.System)
-    Int32(lhs) == Int32(rhs)
+    return Int32(lhs) == Int32(rhs)
 end
 
 function Base.:(==)(lhs::Positions.System, rhs::Baselines.System)
@@ -146,4 +147,3 @@ function Direction(position::Position)
         err("cannot convert given coordinate system to a `Direction`")
     end
 end
-

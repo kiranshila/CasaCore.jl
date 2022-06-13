@@ -20,7 +20,7 @@
 
 struct CasaCoreTable end
 
-@enum TableStatus closed=0 readonly=1 readwrite=5
+@enum TableStatus closed = 0 readonly = 1 readwrite = 5
 
 """
     mutable struct Table
@@ -42,7 +42,7 @@ Table: /tmp/my-table.ms (read/write)
 julia> Tables.add_rows!(table, 3)
 3
 
-julia> table["DATA"] = Complex64[1+2im, 3+4im, 5+6im]
+julia> table["DATA"] = ComplexF64[1+2im, 3+4im, 5+6im]
 3-element Array{Complex{Float32},1}:
  1.0+2.0im
  3.0+4.0im
@@ -67,13 +67,13 @@ julia> Tables.delete(table)
 [`Tables.delete`](@ref)
 """
 mutable struct Table
-    path   :: String
-    status :: TableStatus
-    ptr    :: Ptr{CasaCoreTable}
+    path::String
+    status::TableStatus
+    ptr::Ptr{CasaCoreTable}
     function Table(path, status, ptr)
         table = new(path, status, ptr)
         finalizer(table, close)
-        table
+        return table
     end
 end
 
@@ -107,7 +107,7 @@ function create(path)
     end
     ptr = ccall((:new_table_create, libcasacorewrapper), Ptr{CasaCoreTable},
                 (Ptr{Cchar},), path)
-    Table(path, readwrite, ptr)
+    return Table(path, readwrite, ptr)
 end
 
 """
@@ -150,7 +150,7 @@ function open(path; write=false)
     mode = write ? readwrite : readonly
     ptr = ccall((:new_table_open, libcasacorewrapper), Ptr{CasaCoreTable},
                 (Ptr{Cchar}, Cint), path, mode)
-    Table(path, mode, ptr)
+    return Table(path, mode, ptr)
 end
 
 function open(table::Table; write=false)
@@ -162,11 +162,11 @@ function open(table::Table; write=false)
         mode = write ? readwrite : readonly
         ptr = ccall((:new_table_open, libcasacorewrapper), Ptr{CasaCoreTable},
                     (Ptr{Cchar}, Cint), path, mode)
-        table.path   = path
+        table.path = path
         table.status = mode
-        table.ptr    = ptr
+        table.ptr = ptr
     end
-    table
+    return table
 end
 
 """
@@ -194,7 +194,7 @@ julia> Tables.delete(table)
 """
 function close(table::Table)
     if isopen(table)
-        ccall((:delete_table, libcasacorewrapper), Void,
+        ccall((:delete_table, libcasacorewrapper), Cvoid,
               (Ptr{CasaCoreTable},), table)
         table.status = closed
     end
@@ -222,7 +222,7 @@ julia> Tables.delete(table)
 """
 function delete(table::Table)
     close(table)
-    rm(table.path, recursive=true, force=true)
+    return rm(table.path; recursive=true, force=true)
 end
 
 isopen(table::Table) = table.status != closed
@@ -236,7 +236,7 @@ function table_fix_path(path)
     # Expand a tilde to the home directory
     path = expanduser(path)
     # Normalize "." and ".."
-    path = normpath(path)
+    return path = normpath(path)
 end
 
 function Base.show(io::IO, table::Table)
@@ -247,6 +247,5 @@ function Base.show(io::IO, table::Table)
     elseif table.status == readwrite
         str = " (read/write)"
     end
-    print(io, "Table: ", table.path, str)
+    return print(io, "Table: ", table.path, str)
 end
-

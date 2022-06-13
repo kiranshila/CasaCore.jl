@@ -14,16 +14,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Baselines
-    @enum(System,
-          J2000, JMEAN, JTRUE, APP, B1950, B1950_VLA, BMEAN, BTRUE,
-          GALACTIC, HADEC, AZEL, AZELSW, AZELGEO, AZELSWGEO, JNAT,
-          ECLIPTIC, MECLIPTIC, TECLIPTIC, SUPERGAL, ITRF, TOPO, ICRS)
-    const AZELNE = AZEL
-    const AZELNEGEO = AZELGEO
+@enum(System,
+      J2000, JMEAN, JTRUE, APP, B1950, B1950_VLA, BMEAN, BTRUE,
+      GALACTIC, HADEC, AZEL, AZELSW, AZELGEO, AZELSWGEO, JNAT,
+      ECLIPTIC, MECLIPTIC, TECLIPTIC, SUPERGAL, ITRF, TOPO, ICRS)
+const AZELNE = AZEL
+const AZELNEGEO = AZELGEO
 end
 
+
 macro baseline_str(sys)
-    eval(current_module(),:(Measures.Baselines.$(Symbol(sys))))
+    return eval(:(Baselines.$(Symbol(sys))))
 end
 
 """
@@ -32,17 +33,17 @@ end
 This type represents the location of one antenna relative to another antenna.
 """
 struct Baseline <: Measure
-    sys :: Baselines.System
-    x :: Float64 # measured in meters
-    y :: Float64 # measured in meters
-    z :: Float64 # measured in meters
+    sys::Baselines.System
+    x::Float64 # measured in meters
+    y::Float64 # measured in meters
+    z::Float64 # measured in meters
 end
 
 units(::Baseline) = u"m"
 units(::Type{Baseline}) = u"m"
 
 function Base.show(io::IO, baseline::Baseline)
-    str = @sprintf("%.3f meters, %.3f meters, %.3f meters", baseline.x, baseline.y, baseline.z)
-    print(io, str)
+    str = @sprintf("%.3f meters, %.3f meters, %.3f meters", baseline.x, baseline.y,
+                   baseline.z)
+    return print(io, str)
 end
-

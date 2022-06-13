@@ -24,11 +24,11 @@ const libcasacorewrapper = normpath(joinpath(@__DIR__, "..", "deps", "src",
                                              "libcasacorewrapper.so"))
 
 function __init__()
-    isfile(libcasacorewrapper) || error("Run Pkg.build(\"CasaCore\")")
+    return isfile(libcasacorewrapper) || error("Run Pkg.build(\"CasaCore\")")
 end
 
 struct CasaCoreTablesError <: Exception
-    msg :: String
+    msg::String
 end
 Base.show(io::IO, err::CasaCoreTablesError) = print(io, "CasaCoreTablesError: ", err.msg)
 err(msg) = throw(CasaCoreTablesError(msg))
@@ -48,7 +48,7 @@ include("tables/keywords.jl")
 #"""
 #function lock(table::Table; writelock::Bool=true, attempts::Int=5)
 #    success = ccall(("lock", libcasacorewrapper), Bool,
-#                    (Ptr{Void}, Bool, Cint), table, writelock, attempts)
+#                    (Ptr{Cvoid}, Bool, Cint), table, writelock, attempts)
 #    success || error("Could not get a lock on the table.")
 #    nothing
 #end
@@ -59,8 +59,7 @@ include("tables/keywords.jl")
 #Clear any locks obtained on the given table.
 #"""
 #function Base.unlock(table::Table)
-#    ccall(("unlock", libcasacorewrapper), Void, (Ptr{Void},), table)
+#    ccall(("unlock", libcasacorewrapper), Cvoid, (Ptr{Cvoid},), table)
 #end
 
 end
-

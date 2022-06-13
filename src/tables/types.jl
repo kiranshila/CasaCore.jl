@@ -21,31 +21,31 @@
       TpArrayDComplex, TpArrayString, TpRecord, TpOther, TpQuantity,
       TpArrayQuantity, TpInt64, TpArrayInt64, TpNumberOfTypes)
 
-const type2cpp = ObjectIdDict(Bool      => Bool,      Int32   => Int32,
-                              Float32   => Float32,   Float64 => Float64,
-                              Complex64 => Complex64, String  => Ptr{Cchar})
+const type2cpp = IdDict(Bool => Bool, Int32 => Int32,
+                        Float32 => Float32, Float64 => Float64,
+                        ComplexF64 => ComplexF64, String => Ptr{Cchar})
 
-const type2str = ObjectIdDict(Bool      => :boolean,  Int32     => :int,
-                              Float32   => :float,    Float64   => :double,
-                              Complex64 => :complex,  String    => :string)
+const type2str = IdDict(Bool => :boolean, Int32 => :int,
+                        Float32 => :float, Float64 => :double,
+                        ComplexF64 => :complex, String => :string)
 
-const enum2type = Dict(TpBool    => Bool,      TpArrayBool    => Array{Bool},
-                       TpInt     => Int32,     TpArrayInt     => Array{Int32},
-                       TpFloat   => Float32,   TpArrayFloat   => Array{Float32},
-                       TpDouble  => Float64,   TpArrayDouble  => Array{Float64},
-                       TpComplex => Complex64, TpArrayComplex => Array{Complex64},
-                       TpString  => String,    TpArrayString  => Array{String})
+const enum2type = Dict(TpBool => Bool, TpArrayBool => Array{Bool},
+                       TpInt => Int32, TpArrayInt => Array{Int32},
+                       TpFloat => Float32, TpArrayFloat => Array{Float32},
+                       TpDouble => Float64, TpArrayDouble => Array{Float64},
+                       TpComplex => ComplexF64, TpArrayComplex => Array{ComplexF64},
+                       TpString => String, TpArrayString => Array{String})
 
-const typelist = (Bool, Int32, Float32, Float64, Complex64, String)
+const typelist = (Bool, Int32, Float32, Float64, ComplexF64, String)
 
-function wrap(ptr::Ptr{T}, shape) where T <: Number
+function wrap(ptr::Ptr{T}, shape) where {T<:Number}
     N = length(shape)
-    unsafe_wrap(Array{T, N}, ptr, shape, true)
+    return unsafe_wrap(Array{T,N}, ptr, shape, true)
 end
 
 function wrap(ptr::Ptr{Ptr{Cchar}}, shape)
     N = length(shape)
-    wrap_value.(unsafe_wrap(Array{Ptr{Cchar}, N}, ptr, shape, true))
+    return wrap_value.(unsafe_wrap(Array{Ptr{Cchar},N}, ptr, shape, true))
 end
 
 function wrap_value(ptr::Ptr{Cchar})
@@ -53,9 +53,8 @@ function wrap_value(ptr::Ptr{Cchar})
     # `unsafe_string` copies the data, so we need to free the previously allocated data. Apparently
     # I can't do this with `Libc.free` because julia might be using a different version of libc than
     # what was used to allocate the memory.
-    ccall((:free_string, libcasacorewrapper), Void, (Ptr{Cchar},), ptr)
-    string
+    ccall((:free_string, libcasacorewrapper), Cvoid, (Ptr{Cchar},), ptr)
+    return string
 end
 
 wrap_value(x) = x
-

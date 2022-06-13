@@ -23,7 +23,7 @@ module Directions
 end
 
 macro dir_str(sys)
-    eval(current_module(),:(Measures.Directions.$(Symbol(sys))))
+    eval(:(Directions.$(Symbol(sys))))
 end
 
 """

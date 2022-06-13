@@ -14,11 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Positions
-    @enum(System, ITRF, WGS84)
+@enum(System, ITRF, WGS84)
 end
 
 macro pos_str(sys)
-    eval(current_module(),:(Measures.Positions.$(Symbol(sys))))
+    return eval(:(Positions.$(Symbol(sys))))
 end
 
 """
@@ -27,10 +27,10 @@ end
 This type represents a location on the surface of the Earth.
 """
 struct Position <: Measure
-    sys :: Positions.System
-    x :: Float64 # measured in meters
-    y :: Float64 # measured in meters
-    z :: Float64 # measured in meters
+    sys::Positions.System
+    x::Float64 # measured in meters
+    y::Float64 # measured in meters
+    z::Float64 # measured in meters
 end
 
 units(::Position) = u"m"
@@ -63,31 +63,33 @@ Position(pos"WGS84", 5000m, "20d30m00s", "-80d00m00s")
 Position(pos"WGS84", 5000m, 20.5°, -80°)
 ```
 """
-function Position(sys::Positions.System, elevation::Unitful.Length, longitude::Angle, latitude::Angle)
-    rad  = uconvert(u"m", elevation) |> ustrip
-    long = uconvert(u"rad", longitude) |> ustrip
-    lat  = uconvert(u"rad",  latitude) |> ustrip
-    x = rad*cos(lat)*cos(long)
-    y = rad*cos(lat)*sin(long)
-    z = rad*sin(lat)
-    Position(sys, x, y, z)
+function Position(sys::Positions.System, elevation::Unitful.Length, longitude::Angle,
+                  latitude::Angle)
+    rad = ustrip(uconvert(u"m", elevation))
+    long = ustrip(uconvert(u"rad", longitude))
+    lat = ustrip(uconvert(u"rad", latitude))
+    x = rad * cos(lat) * cos(long)
+    y = rad * cos(lat) * sin(long)
+    z = rad * sin(lat)
+    return Position(sys, x, y, z)
 end
 
 function Position(sys::Positions.System, elevation::Unitful.Length,
                   longitude::AbstractString, latitude::AbstractString)
-    Position(sys, elevation, sexagesimal(longitude)*u"rad", sexagesimal(latitude)*u"rad")
+    return Position(sys, elevation, sexagesimal(longitude) * u"rad",
+                    sexagesimal(latitude) * u"rad")
 end
 
 function Base.show(io::IO, position::Position)
     rad = norm(position)
-    if rad > 1e5*u"m"
+    if rad > 1e5 * u"m"
         rad_str = @sprintf("%.3f km", ustrip(uconvert(u"km", rad)))
     else
         rad_str = @sprintf("%.3f m", ustrip(uconvert(u"m", rad)))
     end
-    long_str = position |> longitude |> sexagesimal
-    lat_str  = position |>  latitude |> sexagesimal
-    print(io, rad_str, ", ", long_str, ", ", lat_str)
+    long_str = sexagesimal(longitude(position))
+    lat_str = sexagesimal(latitude(position))
+    return print(io, rad_str, ", ", long_str, ", ", lat_str)
 end
 
 """
@@ -103,10 +105,9 @@ observatory("ALMA") # the Atacama Large Millimeter/submillimeter Array
 ```
 """
 function observatory(name::AbstractString)
-    position = Position(pos"ITRF", 0.0, 0.0, 0.0) |> Ref{Position}
-    status = ccall(("observatory",libcasacorewrapper), Bool,
+    position = Ref{Position}(Position(pos"ITRF", 0.0, 0.0, 0.0))
+    status = ccall(("observatory", libcasacorewrapper), Bool,
                    (Ref{Position}, Ptr{Cchar}), position, name)
     !status && err("Unknown observatory.")
-    position[]
+    return position[]
 end
-

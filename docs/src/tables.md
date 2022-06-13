@@ -43,7 +43,7 @@ julia> table = Tables.create("/tmp/my-table.ms")
        Npol  =   4 # number of polarizations
        Nfreq =  50 # number of frequency channels
        Nbase = 100 # number of baselines
-       data = rand(Complex64, Npol, Nfreq, Nbase)
+       data = rand(ComplexF64, Npol, Nfreq, Nbase)
        table["DATA"] = data # creates the DATA column if it doesn't already exist
        data == table["DATA"]
 true

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 """
     sexagesimal(string)
 
@@ -37,7 +38,7 @@ function sexagesimal(str::AbstractString)
     #               and if that is found, look for and capture the
     #               decimal number preceding the letter s
     regex = r"(\+|-)?(\d*\.?\d+)(d|h)(?:(\d*\.?\d+)m(?:(\d*\.?\d+)s)?)?"
-    m = match(regex,str)
+    m = match(regex, str)
     m === nothing && err("Unknown sexagesimal format.")
 
     sign = m.captures[1] == "-" ? -1 : +1
@@ -46,10 +47,10 @@ function sexagesimal(str::AbstractString)
     minutes = m.captures[4] === nothing ? 0.0 : float(m.captures[4])
     seconds = m.captures[5] === nothing ? 0.0 : float(m.captures[5])
 
-    minutes += seconds/60
-    degrees_or_hours += minutes/60
+    minutes += seconds / 60
+    degrees_or_hours += minutes / 60
     degrees = isdegrees ? degrees_or_hours : 15degrees_or_hours
-    sign*degrees |> deg2rad
+    return deg2rad(sign * degrees)
 end
 
 """
@@ -60,9 +61,9 @@ Construct a sexagesimal string from the given angle.
 * If `hours` is `true`, the constructed string will use hours instead of degrees.
 * `digits` specifies the number of decimal points to use for seconds/arcseconds.
 """
-function sexagesimal(angle::T; hours::Bool = false, digits::Int = 0) where T
+function sexagesimal(angle::T; hours::Bool=false, digits::Int=0) where {T}
     if T <: Angle
-        radians = uconvert(u"rad", angle) |> ustrip
+        radians = ustrip(uconvert(u"rad", angle))
     else
         radians = angle
     end
@@ -74,18 +75,18 @@ function sexagesimal(angle::T; hours::Bool = false, digits::Int = 0) where T
         radians = abs(radians)
     end
     if hours
-        value = radians * 12/π
-        value = round(value*3600, digits) / 3600
+        value = radians * 12 / π
+        value = round(value * 3600, digits) / 3600
         q1 = floor(Int, value)
         s1 = @sprintf("%dh", q1)
-        s < 0 && (s1 = "-"*s1)
+        s < 0 && (s1 = "-" * s1)
     else
-        value = radians * 180/π
-        value = round(value*3600, digits) / 3600
+        value = radians * 180 / π
+        value = round(value * 3600, digits) / 3600
         q1 = floor(Int, value)
         s1 = @sprintf("%dd", q1)
-        s > 0 && (s1 = "+"*s1)
-        s < 0 && (s1 = "-"*s1)
+        s > 0 && (s1 = "+" * s1)
+        s < 0 && (s1 = "-" * s1)
     end
     value = (value - q1) * 60
     q2 = floor(Int, value)
@@ -98,8 +99,7 @@ function sexagesimal(angle::T; hours::Bool = false, digits::Int = 0) where T
     if digits == 0
         s3 = s3[1:2] * "s"
     else
-        s3 = s3[1:digits+3] * "s"
+        s3 = s3[1:(digits + 3)] * "s"
     end
-    string(s1, s2, s3)
+    return string(s1, s2, s3)
 end
-
