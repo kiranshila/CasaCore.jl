@@ -18,14 +18,6 @@ module MeasurementSets
 
 using ..Tables
 
-const libcasacorewrapper = normpath(joinpath(@__DIR__, "..", "deps", "src",
-                                             "libcasacorewrapper.so"))
-
-function __init__()
-    isfile(libcasacorewrapper) || error("Run Pkg.build(\"CasaCore\")")
-end
-
 include("measurement-sets/measurement-sets.jl")
 
 end
-

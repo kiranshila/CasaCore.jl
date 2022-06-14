@@ -20,13 +20,6 @@ export CasaCoreTablesError
 export Table
 export @kw_str
 
-const libcasacorewrapper = normpath(joinpath(@__DIR__, "..", "deps", "src",
-                                             "libcasacorewrapper.so"))
-
-function __init__()
-    return isfile(libcasacorewrapper) || error("Run Pkg.build(\"CasaCore\")")
-end
-
 struct CasaCoreTablesError <: Exception
     msg::String
 end

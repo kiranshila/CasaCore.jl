@@ -36,13 +36,6 @@ using LinearAlgebra
 # hesitant to commit to this typealias within Unitful.
 const Angle{T} = Unitful.DimensionlessQuantity{T}
 
-const libcasacorewrapper = normpath(joinpath(@__DIR__, "..", "deps", "src",
-                                             "libcasacorewrapper.so"))
-
-function __init__()
-    return isfile(libcasacorewrapper) || error("Run Pkg.build(\"CasaCore\")")
-end
-
 struct CasaCoreMeasuresError <: Exception
     msg::String
 end
