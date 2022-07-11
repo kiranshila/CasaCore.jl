@@ -189,6 +189,6 @@ That is, the `for`-loop will be compiled with the knowledge of the actual type o
 specialization ultimately means that the latter example will generally be faster.
 
 For more information please refer to the [performance tips
-section](https://docs.julialang.org/en/release-0.6/manual/performance-tips/#kernal-functions-1) of
+section](https://docs.julialang.org/en/v1/manual/performance-tips/#kernel-functions) of
 the Julia manual.
 

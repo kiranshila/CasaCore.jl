@@ -22,11 +22,11 @@ At the moment there are 3 different kinds of measures available:
 
 ## Units
 
-CasaCore.Measures depends on the [Unitful](https://github.com/ajkeller34/Unitful.jl) package in
+CasaCore.Measures depends on the [Unitful](https://github.com/PainterQubits/Unitful.jl) package in
 order to specify the units associated with various quantities. The Unitful package should have
 automatically been installed when you ran `Pkg.add("CasaCore")`. You can load the Unitful package by
 running `using Unitful` and [documentation for Unitful is also
-available](http://ajkeller34.github.io/Unitful.jl). Unitful is a particularly elegant package for
+available](https://github.com/PainterQubits/Unitful.jl). Unitful is a particularly elegant package for
 unit-checked computation because the unit checking occurs at compile-time. That is, there is no
 run-time overhead associated with using Unitful.
 
