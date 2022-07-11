@@ -23,5 +23,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/kiranshila/CasaCore.jl",
-    devbranch="main"
+    devbranch="master"
 )

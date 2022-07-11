@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+CasaCore = "718368f3-8adb-47a3-8de4-bb7d0e655ec3"
