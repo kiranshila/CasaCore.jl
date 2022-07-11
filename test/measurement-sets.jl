@@ -16,7 +16,7 @@
 @testset "Measurement Sets" begin
 
     @testset "creation" begin
-        path = tempname()*".ms"
+        path = tempname() * ".ms"
         ms = MeasurementSets.create(path)
         @test Tables.column_exists(ms, "UVW")
         @test Tables.column_exists(ms, "FLAG")
@@ -56,7 +56,7 @@
     end
 
     @testset "reading / writing columns" begin
-        path = tempname()*".ms"
+        path = tempname() * ".ms"
         ms = MeasurementSets.create(path)
         Tables.add_rows!(ms, 5)
 

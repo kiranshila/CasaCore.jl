@@ -129,11 +129,11 @@
 
         @test_throws CasaCoreTablesError Tables.add_column!(table, "test", Float64, (11,))
         @test_throws CasaCoreTablesError Tables.add_column!(table, "test", Float64,
-                                                            (10, 11))
+            (10, 11))
 
         names = ("bools", "ints", "floats", "doubles", "complex", "strings")
         types = (Bool, Int32, Float32, Float64, ComplexF64, String)
-        types_nostring = types[1:(end - 1)]
+        types_nostring = types[1:(end-1)]
         for shape in ((10,), (11, 10), (12, 11, 10))
             for (name, T) in zip(names, types)
                 Tables.add_column!(table, name, T, shape)
@@ -150,8 +150,8 @@
             @test Tables.num_columns(table) == 0
             for T in types_nostring
                 x = rand(T, shape)
-                y = length(shape) == 1 ? rand(T) : rand(T, shape[1:(end - 1)])
-                z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end - 1)])
+                y = length(shape) == 1 ? rand(T) : rand(T, shape[1:(end-1)])
+                z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end-1)])
                 table["test"] = x
                 @test table["test"] == x
                 @test_throws CasaCoreTablesError table["test"] = rand(T, (6, 5)) # incorrect shape
@@ -160,8 +160,8 @@
                 Tables.remove_column!(table, "test")
             end
             x = fill("Hello, world!", shape)
-            y = length(shape) == 1 ? "Wassup??" : fill("Wassup??", shape[1:(end - 1)])
-            z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end - 1)])
+            y = length(shape) == 1 ? "Wassup??" : fill("Wassup??", shape[1:(end-1)])
+            z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end-1)])
             table["test"] = x
             @test table["test"] == x
             @test_throws CasaCoreTablesError table["test"] = fill("A", (6, 5)) # incorrect shape
@@ -178,14 +178,14 @@
         table = Tables.create(path)
         Tables.add_rows!(table, 10)
 
-        names = ("bools", "ints", "floats", "doubles", "complex", "strings")
-        types = (Bool, Int32, Float32, Float64, ComplexF64, String)
-        types_nostring = types[1:(end - 1)]
+        names = ("bools", "ints", "floats", "doubles", "complex", "double_complex", "strings")
+        types = (Bool, Int32, Float32, Float64, ComplexF32, ComplexF64, String)
+        types_nostring = types[1:(end-1)]
         for shape in ((10,), (11, 10), (12, 11, 10))
             for T in types_nostring
                 x = rand(T, shape)
-                y = length(shape) == 1 ? rand(T) : rand(T, shape[1:(end - 1)])
-                z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end - 1)])
+                y = length(shape) == 1 ? rand(T) : rand(T, shape[1:(end-1)])
+                z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end-1)])
                 table["test"] = x
                 table["test", 3] = y
                 @test table["test", 3] == y
@@ -200,8 +200,8 @@
                 Tables.remove_column!(table, "test")
             end
             x = fill("Hello, world!", shape)
-            y = length(shape) == 1 ? "Wassup??" : fill("Wassup??", shape[1:(end - 1)])
-            z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end - 1)])
+            y = length(shape) == 1 ? "Wassup??" : fill("Wassup??", shape[1:(end-1)])
+            z = length(shape) == 1 ? rand(Float16) : rand(Float16, shape[1:(end-1)])
             table["test"] = x
             table["test", 3] = y
             @test table["test", 3] == y
@@ -225,7 +225,7 @@
 
         names = ("bools", "ints", "floats", "doubles", "complex", "strings")
         types = (Bool, Int32, Float32, Float64, ComplexF64, String)
-        types_nostring = types[1:(end - 1)]
+        types_nostring = types[1:(end-1)]
 
         # scalars
         for T in types_nostring
@@ -266,7 +266,7 @@
 
         names = ("bools", "ints", "floats", "doubles", "complex", "strings")
         types = (Bool, Int32, Float32, Float64, ComplexF64, String)
-        types_nostring = types[1:(end - 1)]
+        types_nostring = types[1:(end-1)]
 
         # scalars
         for T in types_nostring
@@ -291,7 +291,7 @@
                 table["column", kw"test"] = x
                 @test table["column", kw"test"] == x
                 @test_throws CasaCoreTablesError table["column", kw"test"] = rand(Float16,
-                                                                                  shape) # incorrect type
+                    shape) # incorrect type
                 @test_throws CasaCoreTablesError table["column", kw"tset"] # typo
                 @test_throws CasaCoreTablesError table["colunm", kw"test"] = x # typo
                 @test_throws CasaCoreTablesError table["column", kw"test"] = Float16(0) # incorrect type
@@ -318,23 +318,14 @@
         Tables.remove_column!(table, "SKA_DATA")
         @test Tables.column_exists(table, "SKA_DATA") == false
 
-        ant1 = Array{Int32}(10)
-        ant2 = Array{Int32}(10)
-        uvw = Array{Float64}(3, 10)
-        time = Array{Float64}(10)
-        data = Array{ComplexF64}(4, 109, 10)
-        model = Array{ComplexF64}(4, 109, 10)
-        corrected = Array{ComplexF64}(4, 109, 10)
-        freq = Array{Float64}(109, 1)
-
-        rand!(ant1)
-        rand!(ant2)
-        rand!(uvw)
-        rand!(time)
-        rand!(data)
-        rand!(model)
-        rand!(corrected)
-        rand!(freq)
+        ant1 = rand(Int32, 10)
+        ant2 = rand(Int32, 10)
+        uvw = rand(Float64, 3, 10)
+        time = rand(Float64, 10)
+        data = rand(ComplexF64, 4, 109, 10)
+        model = rand(ComplexF64, 4, 109, 10)
+        corrected = rand(ComplexF64, 4, 109, 10)
+        freq = rand(Float64, 109, 1)
 
         table["ANTENNA1"] = ant1
         table["ANTENNA2"] = ant2
@@ -372,14 +363,14 @@
         @test table["CORRECTED_DATA", 1] == corrected[:, :, 1]
         @test_throws CasaCoreTablesError table["FABRICATED_DATA", 1]
 
-        rand!(ant1)
-        rand!(ant2)
-        rand!(uvw)
-        rand!(time)
-        rand!(data)
-        rand!(model)
-        rand!(corrected)
-        rand!(freq)
+        ant1 = rand(Int32, 10)
+        ant2 = rand(Int32, 10)
+        uvw = rand(Float64, 3, 10)
+        time = rand(Float64, 10)
+        data = rand(ComplexF64, 4, 109, 10)
+        model = rand(ComplexF64, 4, 109, 10)
+        corrected = rand(ComplexF64, 4, 109, 10)
+        freq = rand(Float64, 109, 1)
 
         table["ANTENNA1", 1] = ant1[1]
         table["ANTENNA2", 1] = ant2[1]

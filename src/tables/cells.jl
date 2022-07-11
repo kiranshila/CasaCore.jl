@@ -17,7 +17,7 @@ function Base.getindex(table::Table, column::String, row::Integer)
     isopen(table) || table_closed_error()
     check_column_row(table, column, row)
     T, shape = column_info(table, column)
-    return read_cell(table, column, row, T, shape[1:(end - 1)])
+    return read_cell(table, column, row, T, shape[1:(end-1)])
 end
 
 function Base.setindex!(table::Table, value, column::String, row::Integer)
@@ -42,7 +42,7 @@ function check_cell(value::Array, column, T, shape)
     if T != eltype(value)
         column_element_type_error(column)
     end
-    if shape[1:(end - 1)] != size(value)
+    if shape[1:(end-1)] != size(value)
         column_shape_error(column)
     end
 end
@@ -65,25 +65,25 @@ for T in typelist
     c_put_cell_array = String(Symbol(:put_cell_array_, typestr))
 
     @eval function read_cell(table::Table, column::String, row::Int, ::Type{$T},
-                             shape::Tuple{})
+        shape::Tuple{})
         # Subtract 1 from the row number to convert to a 0-based indexing scheme
         value = ccall(($c_get_cell_scalar, libcasacorewrapper), $Tc,
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint), table, column, row - 1)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint), table, column, row - 1)
         return wrap_value(value)
     end
 
     @eval function read_cell(table::Table, column::String, row::Int, ::Type{$T},
-                             shape::Tuple)
+        shape::Tuple)
         # Subtract 1 from the row number to convert to a 0-based indexing scheme
         ptr = ccall(($c_get_cell_array, libcasacorewrapper), Ptr{$Tc},
-                    (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint), table, column, row - 1)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint), table, column, row - 1)
         return wrap(ptr, shape)
     end
 
     @eval function write_cell!(table::Table, value::$T, column::String, row::Int)
         # Subtract 1 from the row number to convert to a 0-based indexing scheme
         ccall(($c_put_cell_scalar, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint, $Tc), table, column, row - 1, value)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint, $Tc), table, column, row - 1, value)
         return value
     end
 
@@ -91,8 +91,8 @@ for T in typelist
         # Subtract 1 from the row number to convert to a 0-based indexing scheme
         shape = convert(Vector{Cint}, collect(size(value)))
         ccall(($c_put_cell_array, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint, Ptr{$Tc}, Ptr{Cint}, Cint),
-              table, column, row - 1, value, shape, length(shape))
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Cuint, Ptr{$Tc}, Ptr{Cint}, Cint),
+            table, column, row - 1, value, shape, length(shape))
         return value
     end
 end

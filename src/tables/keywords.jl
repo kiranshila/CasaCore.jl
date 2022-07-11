@@ -30,6 +30,7 @@ function Base.unsafe_convert(::Type{Ptr{Cchar}}, keyword::Keyword)
     return Base.unsafe_convert(Ptr{Cchar}, String(keyword))
 end
 Base.show(io::IO, keyword::Keyword) = print(io, keyword.name)
+Base.String(keyword::Keyword) = convert(String, keyword)
 
 macro kw_str(string)
     quote
@@ -69,20 +70,20 @@ julia> Tables.delete(table)
 function num_keywords(table::Table)
     isopen(table) || table_closed_error()
     return Int(ccall((:num_keywords, libcasacorewrapper), Cuint,
-                     (Ptr{CasaCoreTable},), table))
+        (Ptr{CasaCoreTable},), table))
 end
 
 "Query whether the keyword exists."
 function keyword_exists(table::Table, keyword::Keyword)
     isopen(table) || table_closed_error()
     return ccall((:keyword_exists, libcasacorewrapper), Bool,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
 end
 
 function keyword_exists(table::Table, column::String, keyword::Keyword)
     isopen(table) || table_closed_error()
     return ccall((:column_keyword_exists, libcasacorewrapper), Bool,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}), table, column, keyword)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}), table, column, keyword)
 end
 
 """
@@ -116,7 +117,7 @@ function remove_keyword!(table::Table, keyword::Keyword)
     isopen(table) || table_closed_error()
     iswritable(table) || table_readonly_error()
     ccall((:remove_keyword, libcasacorewrapper), Cvoid,
-          (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
     return keyword
 end
 
@@ -124,7 +125,7 @@ function remove_keyword!(table::Table, column::String, keyword::Keyword)
     isopen(table) || table_closed_error()
     iswritable(table) || table_readonly_error()
     return ccall((:remove_column_keyword, libcasacorewrapper), Cvoid,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}), table, column, keyword)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}), table, column, keyword)
 end
 
 "Get the keyword element type and shape."
@@ -133,10 +134,10 @@ function keyword_info(table::Table, keyword::Keyword)
     element_type = Ref{Cint}(0)
     dimension = Ref{Cint}(0)
     shape_ptr = ccall((:keyword_info, libcasacorewrapper), Ptr{Cint},
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
-                      table, keyword, element_type, dimension)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
+        table, keyword, element_type, dimension)
     T = enum2type[TypeEnum(element_type[])]
-    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[], true)
+    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[]; own=true)
     return T, tuple(shape...)
 end
 
@@ -145,10 +146,10 @@ function keyword_info(table::Table, column::String, keyword::Keyword)
     element_type = Ref{Cint}(0)
     dimension = Ref{Cint}(0)
     shape_ptr = ccall((:column_keyword_info, libcasacorewrapper), Ptr{Cint},
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
-                      table, column, keyword, element_type, dimension)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
+        table, column, keyword, element_type, dimension)
     T = enum2type[TypeEnum(element_type[])]
-    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[], true)
+    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[]; own=true)
     return T, tuple(shape...)
 end
 
@@ -213,75 +214,75 @@ for T in typelist
 
     @eval function read_keyword(table::Table, keyword::Keyword, ::Type{$T}, shape)
         value = ccall(($c_get_keyword, libcasacorewrapper), $Tc,
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
         return wrap_value(value)
     end
 
     @eval function read_keyword(table::Table, keyword::Keyword, ::Type{Array{$T}}, shape)
         ptr = ccall(($c_get_keyword_array, libcasacorewrapper), Ptr{$Tc},
-                    (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
         return wrap(ptr, shape)
     end
 
     @eval function read_keyword(table::Table, column::String, keyword::Keyword,
-                                ::Type{$T}, shape)
+        ::Type{$T}, shape)
         value = ccall(($c_get_column_keyword, libcasacorewrapper), $Tc,
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}),
-                      table, column, keyword)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}),
+            table, column, keyword)
         return wrap_value(value)
     end
 
     @eval function read_keyword(table::Table, column::String, keyword::Keyword,
-                                ::Type{Array{$T}}, shape)
+        ::Type{Array{$T}}, shape)
         ptr = ccall(($c_get_column_keyword_array, libcasacorewrapper), Ptr{$Tc},
-                    (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}),
-                    table, column, keyword)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}),
+            table, column, keyword)
         return wrap(ptr, shape)
     end
 
     @eval function write_keyword!(table::Table, value::$T, keyword::Keyword)
         ccall(($c_put_keyword, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, $Tc), table, keyword, value)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, $Tc), table, keyword, value)
         return value
     end
 
     @eval function write_keyword!(table::Table, value::Array{$T}, keyword::Keyword)
         shape = convert(Vector{Cint}, collect(size(value)))
         ccall(($c_put_keyword_array, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
-              table, keyword, value, shape, length(shape))
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
+            table, keyword, value, shape, length(shape))
         return value
     end
 
     @eval function write_keyword!(table::Table, value::$T,
-                                  column::String, keyword::Keyword)
+        column::String, keyword::Keyword)
         ccall(($c_put_column_keyword, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, $Tc),
-              table, column, keyword, value)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, $Tc),
+            table, column, keyword, value)
         return value
     end
 
     @eval function write_keyword!(table::Table, value::Array{$T},
-                                  column::String, keyword::Keyword)
+        column::String, keyword::Keyword)
         shape = convert(Vector{Cint}, collect(size(value)))
         ccall(($c_put_column_keyword_array, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
-              table, column, keyword, value, shape, length(shape))
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
+            table, column, keyword, value, shape, length(shape))
         return value
     end
 end
 
 function read_keyword(table::Table, keyword::Keyword, ::Type{Table}, shape)
     ptr = ccall((:get_keyword_table, libcasacorewrapper), Ptr{CasaCoreTable},
-                (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}), table, keyword)
     path = wrap_value(ccall((:table_name, libcasacorewrapper), Ptr{Cchar},
-                            (Ptr{CasaCoreTable},), ptr))
+        (Ptr{CasaCoreTable},), ptr))
     return Table(path, table.status, ptr)
 end
 
 function write_keyword!(table::Table, value::Table, keyword::Keyword)
     ccall((:put_keyword_table, libcasacorewrapper), Cvoid,
-          (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{CasaCoreTable}),
-          table, keyword, value)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{CasaCoreTable}),
+        table, keyword, value)
     return value
 end

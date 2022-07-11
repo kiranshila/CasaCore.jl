@@ -1,8 +1,18 @@
 name = "CasaCore"
 uuid = "718368f3-8adb-47a3-8de4-bb7d0e655ec3"
+authors = "Michael Eastwood and contributors"
 
 [deps]
+CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+casacorewrapper_jll = "5eb88fab-4dde-58d8-af5d-492bc9ff933e"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

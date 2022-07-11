@@ -13,13 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using CasaCore.Data
 using CasaCore.Tables
 using CasaCore.Measures
 using CasaCore.MeasurementSets
 using Unitful
-using Base.Test
+using Test
+using Random
+using Dates
+using LinearAlgebra
 
-srand(123)
+Random.seed!(123)
+
+#Data.set_measures_path("/home/kiran/src/CasaCore.jl/IERS")
 
 @testset "CasaCore Tests" begin
     include("tables.jl")

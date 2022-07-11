@@ -7,45 +7,46 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FI]TNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 @enum(TypeEnum,
-      TpBool, TpChar, TpUChar, TpShort, TpUShort, TpInt, TpUInt,
-      TpFloat, TpDouble, TpComplex, TpDComplex, TpString, TpTable,
-      TpArrayBool, TpArrayChar, TpArrayUChar, TpArrayShort, TpArrayUShort,
-      TpArrayInt, TpArrayUInt, TpArrayFloat, TpArrayDouble, TpArrayComplex,
-      TpArrayDComplex, TpArrayString, TpRecord, TpOther, TpQuantity,
-      TpArrayQuantity, TpInt64, TpArrayInt64, TpNumberOfTypes)
+    TpBool, TpChar, TpUChar, TpShort, TpUShort, TpInt, TpUInt,
+    TpFloat, TpDouble, TpComplex, TpDComplex, TpString, TpTable,
+    TpArrayBool, TpArrayChar, TpArrayUChar, TpArrayShort, TpArrayUShort,
+    TpArrayInt, TpArrayUInt, TpArrayFloat, TpArrayDouble, TpArrayComplex,
+    TpArrayDComplex, TpArrayString, TpRecord, TpOther, TpQuantity,
+    TpArrayQuantity, TpInt64, TpArrayInt64, TpNumberOfTypes)
 
 const type2cpp = IdDict(Bool => Bool, Int32 => Int32,
-                        Float32 => Float32, Float64 => Float64,
-                        ComplexF64 => ComplexF64, String => Ptr{Cchar})
+    Float32 => Float32, Float64 => Float64, ComplexF32 => ComplexF32,
+    ComplexF64 => ComplexF64, String => Ptr{Cchar})
 
 const type2str = IdDict(Bool => :boolean, Int32 => :int,
-                        Float32 => :float, Float64 => :double,
-                        ComplexF64 => :complex, String => :string)
+    Float32 => :float, Float64 => :double,
+    ComplexF32 => :complex, ComplexF64 => :double_complex, String => :string)
 
 const enum2type = Dict(TpBool => Bool, TpArrayBool => Array{Bool},
-                       TpInt => Int32, TpArrayInt => Array{Int32},
-                       TpFloat => Float32, TpArrayFloat => Array{Float32},
-                       TpDouble => Float64, TpArrayDouble => Array{Float64},
-                       TpComplex => ComplexF64, TpArrayComplex => Array{ComplexF64},
-                       TpString => String, TpArrayString => Array{String})
+    TpInt => Int32, TpArrayInt => Array{Int32},
+    TpFloat => Float32, TpArrayFloat => Array{Float32},
+    TpDouble => Float64, TpArrayDouble => Array{Float64},
+    TpComplex => ComplexF32, TpDComplex => ComplexF64,
+    TpArrayComplex => Array{ComplexF32}, TpArrayDComplex => Array{ComplexF64},
+    TpString => String, TpArrayString => Array{String})
 
-const typelist = (Bool, Int32, Float32, Float64, ComplexF64, String)
+const typelist = (Bool, Int32, Float32, Float64, ComplexF32, ComplexF64, String)
 
 function wrap(ptr::Ptr{T}, shape) where {T<:Number}
     N = length(shape)
-    return unsafe_wrap(Array{T,N}, ptr, shape, true)
+    return unsafe_wrap(Array{T,N}, ptr, shape; own=true)
 end
 
 function wrap(ptr::Ptr{Ptr{Cchar}}, shape)
     N = length(shape)
-    return wrap_value.(unsafe_wrap(Array{Ptr{Cchar},N}, ptr, shape, true))
+    return wrap_value.(unsafe_wrap(Array{Ptr{Cchar},N}, ptr, shape; own=true))
 end
 
 function wrap_value(ptr::Ptr{Cchar})
@@ -53,6 +54,7 @@ function wrap_value(ptr::Ptr{Cchar})
     # `unsafe_string` copies the data, so we need to free the previously allocated data. Apparently
     # I can't do this with `Libc.free` because julia might be using a different version of libc than
     # what was used to allocate the memory.
+    # TODO FIXME? - Kiran (2022), because we are vendoring casa, is this still true?
     ccall((:free_string, libcasacorewrapper), Cvoid, (Ptr{Cchar},), ptr)
     return string
 end

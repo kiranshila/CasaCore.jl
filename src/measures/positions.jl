@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Positions
-@enum(System, ITRF, WGS84)
+using CEnum
+@cenum(System, ITRF, WGS84)
 end
 
 macro pos_str(sys)
@@ -31,6 +32,11 @@ struct Position <: Measure
     x::Float64 # measured in meters
     y::Float64 # measured in meters
     z::Float64 # measured in meters
+end
+
+# Default constructor for the nullable case
+function Position()
+    Position(pos"ITRF", 0, 0, 0)
 end
 
 units(::Position) = u"m"
@@ -64,7 +70,7 @@ Position(pos"WGS84", 5000m, 20.5°, -80°)
 ```
 """
 function Position(sys::Positions.System, elevation::Unitful.Length, longitude::Angle,
-                  latitude::Angle)
+    latitude::Angle)
     rad = ustrip(uconvert(u"m", elevation))
     long = ustrip(uconvert(u"rad", longitude))
     lat = ustrip(uconvert(u"rad", latitude))
@@ -75,9 +81,9 @@ function Position(sys::Positions.System, elevation::Unitful.Length, longitude::A
 end
 
 function Position(sys::Positions.System, elevation::Unitful.Length,
-                  longitude::AbstractString, latitude::AbstractString)
+    longitude::AbstractString, latitude::AbstractString)
     return Position(sys, elevation, sexagesimal(longitude) * u"rad",
-                    sexagesimal(latitude) * u"rad")
+        sexagesimal(latitude) * u"rad")
 end
 
 function Base.show(io::IO, position::Position)
@@ -107,7 +113,7 @@ observatory("ALMA") # the Atacama Large Millimeter/submillimeter Array
 function observatory(name::AbstractString)
     position = Ref{Position}(Position(pos"ITRF", 0.0, 0.0, 0.0))
     status = ccall(("observatory", libcasacorewrapper), Bool,
-                   (Ref{Position}, Ptr{Cchar}), position, name)
+        (Ref{Position}, Ptr{Cchar}), position, name)
     !status && err("Unknown observatory.")
     return position[]
 end

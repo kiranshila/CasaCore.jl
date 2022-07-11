@@ -1,4 +1,5 @@
 # Copyright (c) 2015-2017 Michael Eastwood
+# Copyright (c) 2022 Kiran Shila
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +16,11 @@
 
 module CasaCore
 
+
 include("Tables.jl")
 include("Measures.jl")
 include("MeasurementSets.jl")
+include("Data.jl")
 
 end
 

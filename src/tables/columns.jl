@@ -58,14 +58,14 @@ julia> Tables.delete(table)
 function num_columns(table::Table)
     isopen(table) || table_closed_error()
     return Int(ccall((:num_columns, libcasacorewrapper), Cuint,
-                     (Ptr{CasaCoreTable},), table))
+        (Ptr{CasaCoreTable},), table))
 end
 
 function column_exists(table::Table, column::String)
     isopen(table) || table_closed_error()
     return ccall((:column_exists, libcasacorewrapper), Bool,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}),
-                 table, column)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}),
+        table, column)
 end
 
 for T in typelist
@@ -81,7 +81,7 @@ for T in typelist
             column_length_mismatch_error(shape[1], Nrows)
         end
         ccall(($c_add_scalar_column, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
         return column
     end
 
@@ -92,10 +92,10 @@ for T in typelist
         if shape[end] != Nrows
             column_length_mismatch_error(shape[end], Nrows)
         end
-        cell_shape = convert(Vector{Cint}, collect(shape[1:(end - 1)]))
+        cell_shape = convert(Vector{Cint}, collect(shape[1:(end-1)]))
         ccall(($c_add_array_column, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cint}, Cint),
-              table, column, cell_shape, length(cell_shape))
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{Cint}, Cint),
+            table, column, cell_shape, length(cell_shape))
         return column
     end
 end
@@ -132,7 +132,7 @@ function remove_column!(table::Table, column::String)
     isopen(table) || table_closed_error()
     iswritable(table) || table_readonly_error()
     return ccall(("remove_column", libcasacorewrapper), Cvoid,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
 end
 
 "Get the column element type and shape."
@@ -141,25 +141,25 @@ function column_info(table::Table, column::String)
     element_type = Ref{Cint}(0)
     dimension = Ref{Cint}(0)
     shape_ptr = ccall((:column_info, libcasacorewrapper), Ptr{Cint},
-                      (Ptr{CasaCoreTable}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
-                      table, column, element_type, dimension)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}, Ref{Cint}, Ref{Cint}),
+        table, column, element_type, dimension)
     T = enum2type[TypeEnum(element_type[])]
-    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[], true)
+    shape = unsafe_wrap(Vector{Cint}, shape_ptr, dimension[]; own=true)
     return T, tuple(shape...)
 end
 
 "Check to see if the column shape is fixed."
 function column_is_fixed_shape(table::Table, column::String)
     return ccall((:column_is_fixed_shape, libcasacorewrapper), Bool,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}),
-                 table, column)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}),
+        table, column)
 end
 
 "Check to see if the column shape can be changed."
 function column_can_change_shape(table::Table, column::String)
     return ccall((:column_can_change_shape, libcasacorewrapper), Bool,
-                 (Ptr{CasaCoreTable}, Ptr{Cchar}),
-                 table, column)
+        (Ptr{CasaCoreTable}, Ptr{Cchar}),
+        table, column)
 end
 
 function Base.getindex(table::Table, column::String)
@@ -198,15 +198,15 @@ for T in typelist
 
     @eval function read_column(table::Table, column::String, ::Type{$T}, shape)
         ptr = ccall(($c_get_column, libcasacorewrapper), Ptr{$Tc},
-                    (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
+            (Ptr{CasaCoreTable}, Ptr{Cchar}), table, column)
         return wrap(ptr, shape)
     end
 
     @eval function write_column!(table::Table, value::Array{$T}, column::String)
         shape = convert(Vector{Cint}, collect(size(value)))
         ccall(($c_put_column, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
-              table, column, value, shape, length(shape))
+            (Ptr{CasaCoreTable}, Ptr{Cchar}, Ptr{$Tc}, Ptr{Cint}, Cint),
+            table, column, value, shape, length(shape))
         return value
     end
 end

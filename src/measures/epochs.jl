@@ -14,16 +14,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Epochs
-    @enum(System, LAST, LMST, GMST1, GAST, UT1, UT2, UTC, TAI, TDT, TCG, TDB, TCB)
-    const IAT = TAI
-    const GMST = GMST1
-    const TT = TDT
-    const UT = UT1
-    const ET = TT
+using CEnum
+@cenum System begin
+    LAST
+    LMST
+    GMST1
+    GAST
+    UT1
+    UT2
+    UTC
+    TAI
+    TDT
+    TCG
+    TDB
+    TCB
+end
+# Equivalencies
+const IAT = TAI
+const GMST = GMST1
+const TT = TDT
+const UT = UT1
+const ET = TT
 end
 
 macro epoch_str(sys)
-    Base.eval(__module__,:(Measures.Epochs.$(Symbol(sys))))
+    Base.eval(__module__, :(Measures.Epochs.$(Symbol(sys))))
 end
 
 """
@@ -32,8 +47,8 @@ end
 This type represents an instance in time.
 """
 struct Epoch <: Measure
-    sys  :: Epochs.System
-    time :: Float64 # measured in seconds
+    sys::Epochs.System
+    time::Float64 # measured in seconds
 end
 
 units(::Epoch) = u"s"
@@ -81,8 +96,13 @@ function Epoch(sys::Epochs.System, time::Unitful.Time)
     Epoch(sys, seconds)
 end
 
+# Default constructor for the nullable case
+function Epoch()
+    Epoch(epoch"UTC", 0)
+end
+
 function Base.show(io::IO, epoch::Epoch)
-    julian_date = 2400000.5 + epoch.time/(24*60*60)
+    julian_date = 2400000.5 + epoch.time / (24 * 60 * 60)
     print(io, Dates.julian2datetime(julian_date))
 end
 

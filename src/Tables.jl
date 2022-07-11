@@ -26,33 +26,13 @@ end
 Base.show(io::IO, err::CasaCoreTablesError) = print(io, "CasaCoreTablesError: ", err.msg)
 err(msg) = throw(CasaCoreTablesError(msg))
 
+using casacorewrapper_jll
+
 include("tables/types.jl")
 include("tables/tables.jl")
 include("tables/rows.jl")
 include("tables/columns.jl")
 include("tables/cells.jl")
 include("tables/keywords.jl")
-
-#"""
-#    Tables.lock(table::Table; writelock = true, attempts = 5)
-#
-#Attempt to get a lock on the given table. Throws an `ErrorException` if a lock is not obtained after
-#the given number of attempts.
-#"""
-#function lock(table::Table; writelock::Bool=true, attempts::Int=5)
-#    success = ccall(("lock", libcasacorewrapper), Bool,
-#                    (Ptr{Cvoid}, Bool, Cint), table, writelock, attempts)
-#    success || error("Could not get a lock on the table.")
-#    nothing
-#end
-#
-#"""
-#    Tables.unlock(table::Table)
-#
-#Clear any locks obtained on the given table.
-#"""
-#function Base.unlock(table::Table)
-#    ccall(("unlock", libcasacorewrapper), Cvoid, (Ptr{Cvoid},), table)
-#end
 
 end

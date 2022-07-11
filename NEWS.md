@@ -1,5 +1,10 @@
 # News
 
+## v0.3.0
+
+* Updates to "modern" Julia, compat with Julia 1.6
+* Use BinaryBuilder artifacts for both casacore and the wrapper
+
 ## v0.2.2
 
 *2018-03-05*

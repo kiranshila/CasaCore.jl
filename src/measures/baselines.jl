@@ -14,10 +14,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Baselines
-@enum(System,
-      J2000, JMEAN, JTRUE, APP, B1950, B1950_VLA, BMEAN, BTRUE,
-      GALACTIC, HADEC, AZEL, AZELSW, AZELGEO, AZELSWGEO, JNAT,
-      ECLIPTIC, MECLIPTIC, TECLIPTIC, SUPERGAL, ITRF, TOPO, ICRS)
+using CEnum
+@cenum System begin
+    J2000
+    JMEAN
+    JTRUE
+    APP
+    B1950
+    B1950_VLA
+    BMEAN
+    BTRUE
+    GALACTIC
+    HADEC
+    AZEL
+    AZELSW
+    AZELGEO
+    AZELSWGEO
+    JNAT
+    ECLIPTIC
+    MECLIPTIC
+    TECLIPTIC
+    SUPERGAL
+    ITRF
+    TOPO
+    ICRS
+end
 const AZELNE = AZEL
 const AZELNEGEO = AZELGEO
 end
@@ -44,6 +65,6 @@ units(::Type{Baseline}) = u"m"
 
 function Base.show(io::IO, baseline::Baseline)
     str = @sprintf("%.3f meters, %.3f meters, %.3f meters", baseline.x, baseline.y,
-                   baseline.z)
+        baseline.z)
     return print(io, str)
 end

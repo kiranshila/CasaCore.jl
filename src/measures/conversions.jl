@@ -43,10 +43,50 @@ measure(frame, Epoch(epoch"UTC", 50237.29*u"d"), epoch"TAI")
 """
 measure
 
+# We have to recreate the Nullable type from Julia 0.6
+# We cant use {T} here because these need to be repr-able in c
+
+# Because the sizes of things need to be the same, the three types we're using here
+# must have default constructors
+
+abstract type Nullable end
+
+struct NullableEpoch <: Nullable
+    hasvalue::Bool
+    value::Epoch
+end
+
+NullableEpoch() = NullableEpoch(false, Epoch())
+NullableEpoch(value::Epoch) = NullableEpoch(true, value)
+
+struct NullableDirection <: Nullable
+    hasvalue::Bool
+    value::Direction
+end
+
+NullableDirection() = NullableDirection(false, Direction())
+NullableDirection(value::Direction) = NullableDirection(true, value)
+
+struct NullablePosition <: Nullable
+    hasvalue::Bool
+    value::Position
+end
+
+NullablePosition() = NullablePosition(false, Position())
+NullablePosition(value::Position) = NullablePosition(true, value)
+
+function Base.show(io::IO, n::Nullable)
+    if n.hasvalue
+        show(io, n.value)
+    else
+        show(io, missing)
+    end
+end
+
 mutable struct ReferenceFrame
-    epoch::Union{Missing,Epoch}
-    direction::Union{Missing,Direction}
-    position::Union{Missing,Position}
+    epoch::NullableEpoch
+    direction::NullableDirection
+    position::NullablePosition
 end
 
 """
@@ -69,25 +109,33 @@ set!(frame, Epoch(epoch"UTC", 50237.29*u"d")) # set the current UTC time
 ```
 """
 function ReferenceFrame()
-    return ReferenceFrame(nothing, nothing, nothing)
+    return ReferenceFrame(NullableEpoch(), NullableDirection(), NullablePosition())
 end
 
-set!(frame::ReferenceFrame, epoch::Epoch) = frame.epoch = epoch
-set!(frame::ReferenceFrame, direction::Direction) = frame.direction = direction
-set!(frame::ReferenceFrame, position::Position) = frame.position = position
+function set!(frame::ReferenceFrame, epoch::Epoch)
+    frame.epoch = NullableEpoch(epoch)
+end
+
+function set!(frame::ReferenceFrame, direction::Direction)
+    frame.direction = NullableDirection(direction)
+end
+
+function set!(frame::ReferenceFrame, position::Position)
+    frame.position = NullablePosition(position)
+end
 
 # TODO we don't actually use the reference frame in the epoch conversions, can we come up with a
 # new API that doesn't require it?
 
-function measure(frame::ReferenceFrame, epoch::Epoch, newsys::Epochs.System)
+function measure(::ReferenceFrame, epoch::Epoch, newsys::Epochs.System)
     return ccall(("convertEpoch", libcasacorewrapper), Epoch, (Ref{Epoch}, Cint), epoch,
-                 newsys)
+        newsys)
 end
 
 function measure(frame::ReferenceFrame, direction::Direction, newsys::Directions.System)
     return ccall(("convertDirection", libcasacorewrapper), Direction,
-                 (Ref{Direction}, Cint, Ref{ReferenceFrame}),
-                 direction, newsys, frame)
+        (Ref{Direction}, Cint, Ref{ReferenceFrame}),
+        direction, newsys, frame)
 end
 
 function measure(frame::ReferenceFrame, direction::UnnormalizedDirection, newsys)
@@ -96,14 +144,14 @@ end
 
 function measure(frame::ReferenceFrame, position::Position, newsys::Positions.System)
     return ccall(("convertPosition", libcasacorewrapper), Position,
-                 (Ref{Position}, Cint, Ref{ReferenceFrame}),
-                 position, newsys, frame)
+        (Ref{Position}, Cint, Ref{ReferenceFrame}),
+        position, newsys, frame)
 end
 
 function measure(frame::ReferenceFrame, baseline::Baseline, newsys::Baselines.System)
     return ccall(("convertBaseline", libcasacorewrapper), Baseline,
-                 (Ref{Baseline}, Cint, Ref{ReferenceFrame}),
-                 baseline, newsys, frame)
+        (Ref{Baseline}, Cint, Ref{ReferenceFrame}),
+        baseline, newsys, frame)
 end
 
 # Define conversions and routines for comparing the different kinds of measures.

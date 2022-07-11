@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 struct RotationMatrix{Sys}
-    sys :: Sys
-    matrix :: SArray{Tuple{3, 3}, Float64, 2, 9}
+    sys::Sys
+    matrix::SArray{Tuple{3,3},Float64,2,9}
 end
 
 function RotationMatrix(from::AnyDirection, to::AnyDirection)
@@ -24,14 +24,14 @@ function RotationMatrix(from::AnyDirection, to::AnyDirection)
     a = Direction(from)
     b = Direction(to)
     v = cross(a, b)
-    c =   dot(a, b) # cos(θ)
-    V = @SMatrix [   0 -v.z  v.y;
-                   v.z    0 -v.x;
-                  -v.y  v.x    0]
-    RotationMatrix(from.sys, I + V + V*V/(1+c))
+    c = dot(a, b) # cos(θ)
+    V = @SMatrix [0 -v.z v.y
+        v.z 0 -v.x
+        -v.y v.x 0]
+    RotationMatrix(from.sys, I + V + V * V / (1 + c))
 end
 
-function Base.:*(matrix::RotationMatrix, measure::T) where T<:VectorMeasure
+function Base.:*(matrix::RotationMatrix, measure::T) where {T<:VectorMeasure}
     check_coordinate_system(matrix, measure)
     from = @SVector [measure.x, measure.y, measure.z]
     to = matrix.matrix * from

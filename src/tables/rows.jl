@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 @noinline function row_out_of_bounds_error(index)
-    return err("The given row index is out of bounds: $index")
+       return err("The given row index is out of bounds: $index")
 end
 
 """
@@ -47,9 +47,9 @@ julia> Tables.delete(table)
 **See also:** [`Tables.num_columns`](@ref), [`Tables.num_keywords`](@ref)
 """
 function num_rows(table::Table)
-    isopen(table) || table_closed_error()
-    return Int(ccall((:num_rows, libcasacorewrapper), Cuint,
-                     (Ptr{CasaCoreTable},), table))
+       isopen(table) || table_closed_error()
+       return Int(ccall((:num_rows, libcasacorewrapper), Cuint,
+              (Ptr{CasaCoreTable},), table))
 end
 
 """
@@ -80,11 +80,11 @@ julia> Tables.delete(table)
 **See also:** [`Tables.remove_rows!`](@ref)
 """
 function add_rows!(table::Table, number::Integer)
-    isopen(table) || table_closed_error()
-    iswritable(table) || table_readonly_error()
-    ccall((:add_rows, libcasacorewrapper), Cvoid,
-          (Ptr{CasaCoreTable}, Cuint), table, number)
-    return number
+       isopen(table) || table_closed_error()
+       iswritable(table) || table_readonly_error()
+       ccall((:add_rows, libcasacorewrapper), Cvoid,
+              (Ptr{CasaCoreTable}, Cuint), table, number)
+       return number
 end
 
 """
@@ -120,15 +120,15 @@ julia> Tables.delete(table)
 **See also:** [`Tables.add_rows!`](@ref)
 """
 function remove_rows!(table::Table, rows)
-    isopen(table) || table_closed_error()
-    iswritable(table) || table_readonly_error()
-    N = num_rows(table)
-    if any(rows .≤ 0) || any(rows .≥ N + 1)
-        row_out_of_bounds_error(rows)
-    end
-    c_rows = collect(rows .- 1)
-    ccall((:remove_rows, libcasacorewrapper), Cvoid,
-          (Ptr{CasaCoreTable}, Ptr{Cuint}, Csize_t),
-          table, c_rows, length(c_rows))
-    return rows
+       isopen(table) || table_closed_error()
+       iswritable(table) || table_readonly_error()
+       N = num_rows(table)
+       if any(rows .≤ 0) || any(rows .≥ N + 1)
+              row_out_of_bounds_error(rows)
+       end
+       c_rows = collect(rows .- 1)
+       ccall((:remove_rows, libcasacorewrapper), Cvoid,
+              (Ptr{CasaCoreTable}, Ptr{Cuint}, Csize_t),
+              table, c_rows, length(c_rows))
+       return rows
 end

@@ -14,12 +14,50 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module Directions
-    @enum(System,
-          J2000, JMEAN, JTRUE, APP, B1950, B1950_VLA, BMEAN, BTRUE,
-          GALACTIC, HADEC, AZEL, AZELSW, AZELGEO, AZELSWGEO, JNAT,
-          ECLIPTIC, MECLIPTIC, TECLIPTIC, SUPERGAL, ITRF, TOPO, ICRS,
-          MERCURY=32, VENUS, MARS, JUPITER, SATURN, URANUS, NEPTUNE,
-          PLUTO, SUN, MOON)
+using CEnum
+@cenum System begin
+    J2000
+    JMEAN
+    JTRUE
+    APP
+    B1950
+    B1950_VLA
+    BMEAN
+    BTRUE
+    GALACTIC
+    HADEC
+    AZEL
+    AZELSW
+    AZELGEO
+    AZELSWGEO
+    JNAT
+    ECLIPTIC
+    MECLIPTIC
+    TECLIPTIC
+    SUPERGAL
+    ITRF
+    TOPO
+    ICRS
+    N_Types
+    # Planets. First one should be Mercury
+    MERCURY = 32
+    VENUS
+    MARS
+    JUPITER
+    SATURN
+    URANUS
+    NEPTUNE
+    PLUTO
+    SUN
+    MOON
+    # Comet or other table-described solar system body
+    COMET
+    N_Planets
+    # All extra bits
+    EXTRA = 32
+    # Defaults
+    DEFAULT = 0
+end
 end
 
 macro dir_str(sys)
@@ -32,21 +70,26 @@ end
 This type represents a location on the sky.
 """
 struct Direction <: Measure
-    sys :: Directions.System
-    x :: Float64
-    y :: Float64
-    z :: Float64
+    sys::Directions.System
+    x::Float64
+    y::Float64
+    z::Float64
     function Direction(sys, x, y, z)
         magnitude = hypot(x, y, z)
-        new(sys, x/magnitude, y/magnitude, z/magnitude)
+        new(sys, x / magnitude, y / magnitude, z / magnitude)
     end
 end
 
+# Default constructor for the nullable case
+function Direction()
+    Direction(dir"J2000", 0, 0, 0)
+end
+
 struct UnnormalizedDirection <: Measure
-    sys :: Directions.System
-    x :: Float64
-    y :: Float64
-    z :: Float64
+    sys::Directions.System
+    x::Float64
+    y::Float64
+    z::Float64
 end
 
 function Base.convert(::Type{Direction}, direction::UnnormalizedDirection)
@@ -57,6 +100,10 @@ function Base.convert(::Type{UnnormalizedDirection}, direction::Direction)
     UnnormalizedDirection(direction.sys, direction.x, direction.y, direction.z)
 end
 
+# This seems weird, but we need them for the tests to pass
+Direction(d::Direction) = d
+Direction(d::UnnormalizedDirection) = convert(Direction, d)
+UnnormalizedDirection(d::Direction) = convert(UnnormalizedDirection, d)
 
 units(::Direction) = 1 # dimensionless
 units(::Type{Direction}) = 1
@@ -125,22 +172,22 @@ Direction(dir"JUPITER") # the direction towards Jupiter
 """
 function Direction(sys::Directions.System, longitude::Angle, latitude::Angle)
     long = uconvert(u"rad", longitude) |> ustrip
-    lat  = uconvert(u"rad",  latitude) |> ustrip
-    x = cos(lat)*cos(long)
-    y = cos(lat)*sin(long)
+    lat = uconvert(u"rad", latitude) |> ustrip
+    x = cos(lat) * cos(long)
+    y = cos(lat) * sin(long)
     z = sin(lat)
     Direction(sys, x, y, z)
 end
 
 function Direction(sys::Directions.System, longitude::AbstractString, latitude::AbstractString)
-    Direction(sys, sexagesimal(longitude)*u"rad", sexagesimal(latitude)*u"rad")
+    Direction(sys, sexagesimal(longitude) * u"rad", sexagesimal(latitude) * u"rad")
 end
 
 Direction(sys::Directions.System) = Direction(sys, 1.0, 0.0, 0.0)
 
 function Base.show(io::IO, direction::Direction)
     long_str = direction |> longitude |> sexagesimal
-    lat_str  = direction |>  latitude |> sexagesimal
+    lat_str = direction |> latitude |> sexagesimal
     print(io, long_str, ", ", lat_str)
 end
 

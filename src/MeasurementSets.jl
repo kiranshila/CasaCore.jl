@@ -17,6 +17,7 @@
 module MeasurementSets
 
 using ..Tables
+using casacorewrapper_jll
 
 include("measurement-sets/measurement-sets.jl")
 

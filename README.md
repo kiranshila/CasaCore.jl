@@ -20,4 +20,3 @@ Functionality is divided into two submodules:
 **Author:** Michael Eastwood
 
 **License:** GPLv3+
-

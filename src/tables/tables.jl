@@ -72,7 +72,7 @@ mutable struct Table
     ptr::Ptr{CasaCoreTable}
     function Table(path, status, ptr)
         table = new(path, status, ptr)
-        finalizer(table, close)
+        finalizer(close, table)
         return table
     end
 end
@@ -106,7 +106,7 @@ function create(path)
         table_exists_error()
     end
     ptr = ccall((:new_table_create, libcasacorewrapper), Ptr{CasaCoreTable},
-                (Ptr{Cchar},), path)
+        (Ptr{Cchar},), path)
     return Table(path, readwrite, ptr)
 end
 
@@ -149,7 +149,7 @@ function open(path; write=false)
     end
     mode = write ? readwrite : readonly
     ptr = ccall((:new_table_open, libcasacorewrapper), Ptr{CasaCoreTable},
-                (Ptr{Cchar}, Cint), path, mode)
+        (Ptr{Cchar}, Cint), path, mode)
     return Table(path, mode, ptr)
 end
 
@@ -161,7 +161,7 @@ function open(table::Table; write=false)
         end
         mode = write ? readwrite : readonly
         ptr = ccall((:new_table_open, libcasacorewrapper), Ptr{CasaCoreTable},
-                    (Ptr{Cchar}, Cint), path, mode)
+            (Ptr{Cchar}, Cint), path, mode)
         table.path = path
         table.status = mode
         table.ptr = ptr
@@ -195,7 +195,7 @@ julia> Tables.delete(table)
 function close(table::Table)
     if isopen(table)
         ccall((:delete_table, libcasacorewrapper), Cvoid,
-              (Ptr{CasaCoreTable},), table)
+            (Ptr{CasaCoreTable},), table)
         table.status = closed
     end
 end
