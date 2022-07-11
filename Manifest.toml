@@ -217,9 +217,9 @@ version = "3.5.0+0"
 
 [[deps.casacorewrapper_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "casacore_jll"]
-path = "/home/kiran/.julia/dev/casacorewrapper_jll/"
+git-tree-sha1 = "62e613836db8ea5df450ab400a7b80af68cd159b"
 uuid = "5eb88fab-4dde-58d8-af5d-492bc9ff933e"
-version = "0.2.0+0"
+version = "0.1.0+1"
 
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
