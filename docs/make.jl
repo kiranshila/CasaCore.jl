@@ -1,10 +1,18 @@
 using Documenter, CasaCore
 
-makedocs(
-    format = :html,
-    sitename = "CasaCore.jl",
-    authors = "Michael Eastwood",
-    pages = [
+DocMeta.setdocmeta!(CasaCore, :DocTestSetup, :(using CasaCore); recursive=true)
+
+makedocs(;
+    modules=[CasaCore],
+    authors="Michael Eastwood and contributors",
+    repo="https://github.com/kiranshila/CasaCore.jl/blob/{commit}{path}#{line}",
+    sitename="CasaCore.jl",
+    format=Documenter.HTML(;
+        prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://kiranshila.github.io/CasaCore.jl",
+        assets=String[]
+    ),
+    pages=[
         "Introduction" => "index.md",
         "Modules" => [
             "CasaCore.Tables" => "tables.md",
@@ -13,11 +21,7 @@ makedocs(
     ]
 )
 
-deploydocs(
-    repo   = "github.com/mweastwood/CasaCore.jl.git",
-    julia  = "0.6",
-    target = "build",
-    deps   = nothing,
-    make   = nothing
+deploydocs(;
+    repo="github.com/kiranshila/CasaCore.jl",
+    devbranch="main"
 )
-
