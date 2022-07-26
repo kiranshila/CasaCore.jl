@@ -38,7 +38,7 @@ const ET = TT
 end
 
 macro epoch_str(sys)
-    Core.eval(@__MODULE__,:(Measures.Epochs.$(Symbol(sys))))
+    :(Epochs.$(Symbol(sys)))
 end
 
 """

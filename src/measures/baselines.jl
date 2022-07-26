@@ -43,9 +43,8 @@ const AZELNE = AZEL
 const AZELNEGEO = AZELGEO
 end
 
-
 macro baseline_str(sys)
-    Core.eval(@__MODULE__,:(Measures.Baselines.$(Symbol(sys))))
+    :(Baselines.$(Symbol(sys)))
 end
 
 """

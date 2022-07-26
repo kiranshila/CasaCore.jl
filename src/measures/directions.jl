@@ -61,7 +61,7 @@ end
 end
 
 macro dir_str(sys)
-    Core.eval(@__MODULE__,:(Measures.Directions.$(Symbol(sys))))
+    :(Directions.$(Symbol(sys)))
 end
 
 """

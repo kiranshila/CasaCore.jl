@@ -19,7 +19,7 @@ using CEnum
 end
 
 macro pos_str(sys)
-    Core.eval(@__MODULE__,:(Measures.Positions.$(Symbol(sys))))
+    :(Positions.$(Symbol(sys)))
 end
 
 """
