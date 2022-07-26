@@ -45,7 +45,7 @@ end
 
 
 macro baseline_str(sys)
-    return eval(:(Baselines.$(Symbol(sys))))
+    Core.eval(@__MODULE__,:(Measures.Baselines.$(Symbol(sys))))
 end
 
 """
